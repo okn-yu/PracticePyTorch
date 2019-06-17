@@ -110,8 +110,10 @@ for epoc in range(num_epocs):
     avg_train_loss = train_loss / len(train_loader.dataset)
     avg_train_acc = train_acc / len(train_loader.dataset)
 
+    # Sets the module in evaluation mode.
     net.eval()
 
+    # 評価するときに必要のない計算が走らないようにtorch.no_gradを使用 -> 要確認
     with torch.no_grad():
         for images, labels in test_loader:
             images, labels = images.view(-1, 32 * 32 * 3).to(device), labels.to(device)
