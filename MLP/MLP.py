@@ -24,6 +24,7 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=64, s
 
 # バッチサイズの個数に相当する画像とラベルを取得
 for images, labels in train_loader:
+    print(type(images))
     print(image.size())
     print(images[0].size())
     print(labels.size())
@@ -66,8 +67,6 @@ criterion = nn.CrossEntropyLoss()
 # 第1引数: iterable of parameters to optimize or dicts defining parameter groups
 optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.9, weight_decay =5e-4)
 
-print(net.parameters())
-
 num_epocs = 50
 
 train_loss_list = []
@@ -81,16 +80,31 @@ for epoc in range(num_epocs):
     val_loss = 0
     val_acc = 0
 
+    # Sets the module in training mode.
+    # DropoutやBatchNormはtraining modeか否かで挙動が異なる
     net.train()
 
     for i, (images, labels) in enumerate(train_loader):
+        # print(type(images)) : <class 'torch.Tensor'>
+        # view: Returns a new tensor with the same data as the self tensor but of a different shape.
         images, labels = images.view(-1, 32 * 32 * 3).to(device), labels.to(device)
+        # Clears the gradients of all optimized torch.Tensor s.
         optimizer.zero_grad()
+        # FF
+        # __call()__メソッドによりimagesを渡すとforwardされる
         outputs = net(images)
+        # FFとlossは別々に計算
         loss = criterion(outputs, labels)
         train_loss += loss.item()
         train_acc += ((outputs.max(1))[1] == labels).sum().item()
+        # 逆伝搬
+        # lossのbackward()がhook経由でnetと結びついている？(要確認)
+        # 参考URL:
+        #  http://aidiary.hatenablog.com/entry/20180129/1517233796
+        #  https://qiita.com/kenmikamin/items/a31937cbe6385a19b82f
         loss.backward()
+        # Performs a single optimization step.
+        # gradを元に傾配降下法を実行
         optimizer.step()
 
     avg_train_loss = train_loss / len(train_loader.dataset)
