@@ -7,16 +7,22 @@ import torchvision.transforms as transforms
 import numpy as np
 from matplotlib import pyplot as plt
 
+# transformsはデータ拡張・リサイズ・正規化などの前処理を実施
 train_dataset = torchvision.datasets.CIFAR10(root='./data/', train=True, transform=transforms.ToTensor(), download=True)
 test_dataset = torchvision.datasets.CIFAR10(root='./data/', train=False, transform=transforms.ToTensor(), download=True)
 
+# datasetsは画像とラベルのペアを返却
 image, label = train_dataset[0]
-# print(image.size())
+# print(image.size()) # size()はnumpyでのshape相当
 # print(label)
 
+# DataSet -> DatasetLoaderの順に処理
+# num_workersはデータのロードを行うプロセス数
+# 0の場合はmainプロセスにてロード
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=64, shuffle = True, num_workers=2)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=64, shuffle = False, num_workers=2)
 
+# バッチサイズの個数に相当する画像とラベルを取得
 for images, labels in train_loader:
     print(image.size())
     print(images[0].size())
@@ -25,13 +31,21 @@ for images, labels in train_loader:
 
 num_classes = 10
 
-
+# nn.Module: Base class for all neural network modules.
+# https://pytorch.org/docs/stable/_modules/torch/nn/modules/module.html
+# https://pytorch.org/docs/stable/nn.html
+# APIとしてforwardは実装されているがbackwardは実装されていないことに注意
 class MLPNet(nn.Module):
     def __init__(self):
         super(MLPNet, self).__init__()
+        # nn.Linearは線形変換
+        # 引数には入力次元と出力次元
+        # バイアスもデフォルトで設定される
         self.fc1 = nn.Linear(32 * 32 * 3, 600)
         self.fc2 = nn.Linear(600, 600)
         self.fc3 = nn.Linear(600, num_classes)
+        # nn.Dropout2dは2次元ドロップアウトレイヤー
+        # 1次元ドロップアウトや3次元ドロップアウトも存在
         self.dropout1 = nn.Dropout2d(0.2)
         self.dropout2 = nn.Dropout2d(0.2)
 
@@ -47,7 +61,12 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 net = MLPNet().to(device)
 
 criterion = nn.CrossEntropyLoss()
+
+# https://pytorch.org/docs/stable/optim.html
+# 第1引数: iterable of parameters to optimize or dicts defining parameter groups
 optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.9, weight_decay =5e-4)
+
+print(net.parameters())
 
 num_epocs = 50
 
