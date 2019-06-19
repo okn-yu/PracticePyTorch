@@ -9,38 +9,39 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # MLP.pyでは精度50%程度だったのが精度60%程度まで向上
-# それでも低い気がするが。。。
-# バッチサイズを64から128にまで変更しても精度はほぼ同じ
+# それでも低い気がするが...
+# バッチサイズを64から128にまで変更しても精度はほぼ同じ..
+# 基本的な流れはMLP.pyと同じなので省略
 
-train_dataset = torchvision.datasets.CIFAR10(root='./data/',
-                                             train=True,
-                                             transform=transforms.ToTensor(),
-                                             download=True)
+train_dataset = torchvision.datasets.CIFAR10(root='./data/', train=True, transform=transforms.ToTensor(), download=True)
+test_dataset = torchvision.datasets.CIFAR10(root='./data/', train=False, transform=transforms.ToTensor(), download=True)
 
-test_dataset = torchvision.datasets.CIFAR10(root='./data/',
-                                            train=False,
-                                            transform=transforms.ToTensor(),
-                                            download=True)
-
-train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                           batch_size=64,
-                                           shuffle=True,
-                                           num_workers=2)
-test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-                                          batch_size=64,
-                                          shuffle=False,
-                                          num_workers=2)
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=64, shuffle=True, num_workers=2)
+test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=64, shuffle=False, num_workers=2)
 
 num_classes = 10
-
 
 class AlexNet(nn.Module):
 
     def __init__(self, num_classes):
         super(AlexNet, self).__init__()
+
+        # self.featuresはModuleクラスのデフォルトのメンバ変数ではないように見える
+        # nn.Sequential:
+        # A sequential container. Modules will be added to it in the order they are passed in the constructor.
+        # Alternatively, an ordered dict of modules can also be passed in.
+        # ネットワークを定義する際にはバッチサイズを無視できるのが地味に助かる
+
+        # 個別の層でサイズがどう変わるのかが知りたい
         self.features = nn.Sequential(
+            # nn.Conv2d:
+            # Applies a 2D convolution over an input signal composed of several input planes.
+            # torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros')
+            # input:(3, 32, 32) -> output:(64, 9, 9)
             nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=5),
             nn.ReLU(inplace=True),
+            # torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros')
+            # input:(64, 9, 9) -> output:(192, 4?, 4?)
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(64, 192, kernel_size=5, padding=2),
             nn.ReLU(inplace=True),
