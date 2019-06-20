@@ -5,13 +5,9 @@ import torch.nn.init as init
 import torch.optim as optim
 import torch.nn.functional as F
 import torchvision.transforms as transforms
+import torchvision.models as models
 import numpy as np
 from matplotlib import pyplot as plt
-
-# MLP.pyでは精度50%程度だったのが精度60%程度まで向上
-# それでも低い気がするが...
-# バッチサイズを64から128にまで変更しても精度はほぼ同じ..
-# 基本的な流れはMLP.pyと同じなので省略
 
 train_dataset = torchvision.datasets.CIFAR10(root='./data/', train=True, transform=transforms.ToTensor(), download=True)
 test_dataset = torchvision.datasets.CIFAR10(root='./data/', train=False, transform=transforms.ToTensor(), download=True)
@@ -20,59 +16,18 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=64,
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=64, shuffle=False, num_workers=2)
 
 num_classes = 10
-
-class AlexNet(nn.Module):
-
-    def __init__(self, num_classes):
-        super(AlexNet, self).__init__()
-
-        # self.featuresはModuleクラスのデフォルトのメンバ変数ではないように見える
-        # nn.Sequential:
-        # A sequential container. Modules will be added to it in the order they are passed in the constructor.
-        # Alternatively, an ordered dict of modules can also be passed in.
-        # ネットワークを定義する際にはバッチサイズを無視できるのが地味に助かる
-        # というかネットワーク定義時にはバッチサイズは不定のはず
-        # https://github.com/pytorch/pytorch/blob/master/torch/nn/modules/container.py
-        self.features = nn.Sequential(
-            # nn.Conv2d:
-            # Applies a 2D convolution over an input signal composed of several input planes.
-            # torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros')
-            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=5),
-            nn.ReLU(inplace=True),
-            # torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros')
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(64, 192, kernel_size=5, padding=2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(192, 384, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(384, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(256, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-        )
-        self.classifier = nn.Linear(256, num_classes)
-
-    def forward(self, x):
-        # sequentialの実装:
-        # クラスの._modules.values()の使い方は参考になる
-        # def forward(self, input):
-        #     for module in self._modules.values():
-        #         input = module(input)
-        #
-        # return input
-        x = self.features(x)
-        # print(x.size()) : torch.Size([128, 256, 1, 1])
-        x = x.view(x.size(0), -1)
-        # print(x.size()) : torch.Size([128, 256])
-        x = self.classifier(x)
-        # print(x.size()) : torch.Size([128, 10])
-        return x
-
-
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-net = AlexNet(num_classes).to(device)
+
+# ここから転移学習
+net = models.alexnet(pretrained=True)
+net = net.to(device)
+
+for param in net.parameters():
+    param.requires_grad = False
+
+num_ftrs = net.classifier[6].in_features
+net.classifier[6] = nn.Linear(num_ftrs, 2).to(device)
+## ここまで転移学習
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4)
@@ -146,3 +101,6 @@ plt.xlabel('epoch')
 plt.ylabel('acc')
 plt.title('Training and validation accuracy')
 plt.grid()
+
+
+
