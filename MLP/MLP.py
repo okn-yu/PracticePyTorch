@@ -34,7 +34,6 @@ num_classes = 10
 
 # nn.Module: Base class for all neural network modules.
 # https://pytorch.org/docs/stable/_modules/torch/nn/modules/module.html
-# https://pytorch.org/docs/stable/nn.html
 # APIとしてforwardは実装されているがbackwardは実装されていないことに注意
 class MLPNet(nn.Module):
     def __init__(self):
