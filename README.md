@@ -4,7 +4,9 @@
 - 転移学習とは、端的に言えばある領域で学習させたモデルを、別の領域に適応させる技術
 - 少ないデータしかない領域でのモデル構築
 - 実装上はパラメータのフリーズを行う。AlexNetでfeaturesはフリーズしてclassifierのみを学習する場合など
-- 詳細のリンク先: https://qiita.com/icoxfog417/items/48cbf087dd22f1f8c6f4
+- 詳細のリンク先は以下: 
+- ①. https://qiita.com/icoxfog417/items/48cbf087dd22f1f8c6f4
+- ②. https://qiita.com/ANNEX_IBS/items/55c7a8984fe88a756965
 
 ## FineTuning
 - Fine Tuning :学習済みモデルの一部を再利用して、新しいモデルを構築する手法
