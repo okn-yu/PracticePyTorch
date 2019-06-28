@@ -11,6 +11,12 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=64,
 # https://qiita.com/kazetof/items/6a72926b9f8cd44c218e
 
 def imshow(img):
+    # batch_sizeの値によってサイズが異なる　
+    # 画像1つ分のサイズ * バッチサイズの値となる
+    # MNISTとしても色として3成分もつことに注意
+    # torch.Size([3, 30, 30])
+    # torch.Size([3, 240, 240])
+    print(img.size())
     # 入力範囲を[-1, 1] から [0, 1] に変更
     img = img / 2 + 0.5
     npimg = img.numpy()
@@ -33,6 +39,7 @@ images, labels = dataiter.next()
 #         7, 3, 7, 5, 4, 4, 8, 7, 2, 5, 8, 7, 3, 3, 5, 1, 5, 0, 0, 9, 4, 2, 8, 8,
 #         6, 1, 1, 4, 0, 2, 7, 3, 6, 6, 2, 0, 2, 2, 2, 8])
 
-# 8x8の格子状に画像を表示
+# 8x8(batch_size個)の格子状に画像を表示
+# nrowを調整しても結局64(batch_size個)の画像が格子状に表示される
 #imshow(images[0])
 imshow(torchvision.utils.make_grid(images))

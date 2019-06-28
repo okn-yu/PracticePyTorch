@@ -8,6 +8,8 @@ import torchvision.transforms as transforms
 import torchvision.models as models
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 # Alexnetの実装確認用
 net = models.alexnet(pretrained=True)
 
@@ -122,4 +124,35 @@ for param in net.parameters():
 # ))])
 # training : True
 
-print(net.features[0])
+# print(net.features[0]) # Conv2d(3, 64, kernel_size=(11, 11), stride=(4, 4), padding=(2, 2))
+
+# 重み可視化用サンプルコード
+# これが論文再現の第一歩とする!!
+
+test = net.features[3].weight[0][0].numpy()
+plt.imshow(test.reshape(5,5))
+plt.show()
+
+test = net.features[3].weight[1][0].numpy()
+plt.imshow(test.reshape(5,5))
+plt.show()
+
+# test = net.features[10].weight[2][0].numpy()
+# plt.imshow(test.reshape(11,11))
+# plt.show()
+#
+# test = net.features[10].weight[3][0].numpy()
+# plt.imshow(test.reshape(11,11))
+# plt.show()
+#
+# test = net.features[10].weight[4][0].numpy()
+# plt.imshow(test.reshape(11,11))
+# plt.show()
+
+# test = net.features[0].weight[4][1].numpy()
+# plt.imshow(test.reshape(11,11))
+# plt.show()
+#
+# test = net.features[0].weight[4][2].numpy()
+# plt.imshow(test.reshape(11,11))
+# plt.show()
