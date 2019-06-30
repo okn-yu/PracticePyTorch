@@ -17,12 +17,10 @@ to_tensor_transform = transforms.Compose([
 img = cv2.imread('./data/hymenoptera_data/train/ants/0013035.jpg')
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-# plt.imshow(img)
-# plt.show()
-
 root = './data/hymenoptera_data'
 
 
+# Datasetを継承して__len__と__getitem__を実装すれば独自のDatasetクラスをつくれる
 class CustomDataset(torch.utils.data.Dataset):
     classes = ['ant', 'bee']
 
@@ -53,7 +51,8 @@ class CustomDataset(torch.utils.data.Dataset):
             self.images.append(os.path.join(root_bees_path, image))
             self.labels.append(label)
 
-
+    # __getitem__()は特殊メソッド
+    # class[key]でアクセスした場合の挙動
     def __getitem__(self, index):
 
         image = self.images[index]
@@ -68,6 +67,9 @@ class CustomDataset(torch.utils.data.Dataset):
 
         return image, label
 
+    # __len__()は特殊メソッド
+    # 組み込み関数len()適用時の動作を規定するメソッド
+    # つまりクラス側でlen()の返す値を決めることができる!!
     def __len__(self):
 
         return len(self.images)
