@@ -1,4 +1,4 @@
-# Sample code for convolution -> deconvolution.
+# Sample code for convolution -> ReLu -> pooling -> pooling -> unpooling -> ReLu -> deconvolution deconvolution.
 
 import cv2
 import torch
@@ -9,9 +9,6 @@ import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 from torch.autograd import Variable
 import numpy as np
-
-# 学習済みモデルのフィルターを用いて、畳み込みおよびプーリングを行う
-# https://qiita.com/kazetof/items/6a72926b9f8cd44c218e
 
 def resize_img(img, rate):
     tensor_list = []
@@ -64,8 +61,7 @@ def imshow(img):
 net = models.alexnet(pretrained=True)
 first_conv_layer = net.features[0]
 
-# 重みの確認
-# print(first_conv_layer.weight)
+first_pool_layer = net.features[1]
 
 train_dataset = torchvision.datasets.CIFAR10(root='./data/', train=True, transform=transforms.ToTensor(),
                                              download=False)
@@ -79,13 +75,6 @@ images, labels = dataiter.next()
 # 7倍に拡大する -> (16 * 3 * 224 * 224)
 images = resize_img(images, 7)
 imshow(torchvision.utils.make_grid(images, nrow=4))
-
-# 1枚画像を選んで表示
-# image_plot = images[0][1].numpy() # images[0][1] -> つまりRGBから1つだけ選択
-# print(image_plot.shape) # -> (32, 32)
-
-image_plot = images[0]
-imshow(image_plot)
 
 # 第1層を用いて畳み込みを行う
 img_input = Variable(images)
