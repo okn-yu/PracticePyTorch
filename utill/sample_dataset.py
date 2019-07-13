@@ -55,6 +55,7 @@ class CustomDataset(torch.utils.data.Dataset):
     # class[key]でアクセスした場合の挙動
     def __getitem__(self, index):
 
+        # CIFAR10の拡大・縮小処理を実施した場合はこのimageを変更すればうまく動きそう
         image = self.images[index]
         label = self.labels[index]
 

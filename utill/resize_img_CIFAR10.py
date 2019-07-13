@@ -1,12 +1,15 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
+import torch.utils.data
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
-train_dataset = torchvision.datasets.CIFAR10(root='./data/', train=True, transform=transforms.ToTensor(), download=False)
+train_dataset = torchvision.datasets.CIFAR10(root='./data/', train=True, transform=transforms.ToTensor(),
+                                             download=False)
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=16, shuffle=True, num_workers=2)
+
 
 # 参照元
 # https://qiita.com/kazetof/items/6a72926b9f8cd44c218e
@@ -16,7 +19,6 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=16,
 # datasetおよびloaderの作り直しが必要らしい
 
 def resize_img(img, rate):
-
     tensor_list = []
 
     for i in range(img.shape[0]):
@@ -24,8 +26,8 @@ def resize_img(img, rate):
 
     return torch.stack(tensor_list, dim=0)
 
-def _resize_img(img, rate):
 
+def _resize_img(img, rate):
     img = img.numpy()
     img = np.transpose(img, (1, 2, 0))
     H, W, C = img.shape
@@ -47,6 +49,7 @@ def _resize_img(img, rate):
 
     return torch.tensor(resized_img)
 
+
 def imshow(img):
     # 入力範囲を[-1, 1] から [0, 1] に変更
     img = img / 2 + 0.5
@@ -56,6 +59,7 @@ def imshow(img):
     npimg = np.transpose(npimg, (1, 2, 0))
     plt.imshow(npimg)
     plt.show()
+
 
 # iter()でDataLoaderで定義された__iter__が呼ばれ，DataLoaderIterを返す
 # dataiter.next()を呼ぶごとにnバッチ目，n+1バッチ目と繰り返しデータを取得
@@ -77,4 +81,4 @@ images, labels = dataiter.next()
 
 resized_images = resize_img(images, 7)
 imshow(torchvision.utils.make_grid(resized_images, nrow=4))
-#imshow(torchvision.utils.make_grid(images, nrow=4))
+# imshow(torchvision.utils.make_grid(images, nrow=4))

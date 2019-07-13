@@ -60,8 +60,8 @@ def imshow(img):
 # AlexNetの第1層
 net = models.alexnet(pretrained=True)
 first_conv_layer = net.features[0]
-
 first_pool_layer = net.features[1]
+relu_function = net.features[4]
 
 train_dataset = torchvision.datasets.CIFAR10(root='./data/', train=True, transform=transforms.ToTensor(),
                                              download=False)
@@ -80,12 +80,17 @@ imshow(torchvision.utils.make_grid(images, nrow=4))
 img_input = Variable(images)
 raw_result = first_conv_layer(img_input)
 
-# チャネル数が3 -> 64に変換されているのでそのまま可視化できない...
-conv_plot = raw_result[0][1].data.numpy()
-##imshow(raw_result[0])
-imshow(torchvision.utils.make_grid(raw_result[0][0].data, nrow=4))
-plt.imshow(conv_plot, interpolation='nearest')
-plt.show()
+# ReLu関数
+relu_result = relu_function(img_input)
+imshow(torchvision.utils.make_grid(relu_result[0][1].data, nrow=4))
+
+# MaxPooling
+pool_result = first_pool_layer(relu_result)
+imshow(torchvision.utils.make_grid(pool_result[0][1].data, nrow=4))
+
+# MaxUnPooling
+unpool = torch.nn.MaxUnpool2d(kernel_size=3, stride=2, padding=0, dilation=1, ceil_mode=False)
+
 
 # 逆畳み込みを実施してみる
 deconv_layer = torch.nn.ConvTranspose2d(64, 3, (11, 11), stride=(4, 4), padding=(2, 2))
@@ -101,4 +106,3 @@ print(type(result)) # -> <class 'torch.Tensor'>
 # Variable's can’t be transformed to numpy, because they’re wrappers around tensors that save the operation history, and numpy doesn’t have such objects. You can retrieve a tensor held by the Variable, using the .data attribute. Then, this should work: var.data.numpy().
 
 imshow(torchvision.utils.make_grid(result.data, nrow=4))
-imshow(result[0].data)

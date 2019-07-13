@@ -64,7 +64,16 @@ model = models.vgg19(pretrained=True)
 # )
 
 model = models.vgg16(pretrained=True)
-print(model)
+# print(model)
+print(model.features[4].padding)
+
+# pretrainedのモデルはデフォルトでreturn_indices=Falseだが、動的な変更は可能
+# 当然ながらmaxpoolに重みはない
+model.features[4].return_indices = True
+
+print(model.features[4].return_indices)
+print(type(model.features[4]))
+print(isinstance(model.features[4], torch.nn.modules.pooling.MaxPool2d))
 
 # VGG16:
 # VGG(

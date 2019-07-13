@@ -8,13 +8,13 @@ from PIL import Image
 train_dataset = torchvision.datasets.CIFAR10(root='./data/', train=True, transform=transforms.ToTensor(), download=True)
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=1, shuffle=True, num_workers=2)
 
+
 # 参照元
 # https://qiita.com/kazetof/items/6a72926b9f8cd44c218e
 # CIFAR10:画像サイズは32*32
 # CNN利用時には4次元テンソルを用いるのでこの方法を直接は利用できない
 
 def resize_img(img, rate):
-
     img = img.numpy()
     img = np.transpose(img, (1, 2, 0))
     H, W, C = img.shape
@@ -33,6 +33,7 @@ def resize_img(img, rate):
 
     return torch.tensor(resized_img)
 
+
 def imshow(img):
     # batch_sizeが1の場合:
     print("before resize: " + str(img.size()))
@@ -50,6 +51,7 @@ def imshow(img):
     plt.imshow(npimg)
     plt.show()
 
+
 # iter()でDataLoaderで定義された__iter__が呼ばれ，DataLoaderIterを返す
 # dataiter.next()を呼ぶごとにnバッチ目，n+1バッチ目と繰り返しデータを取得
 dataiter = iter(train_loader)
@@ -66,5 +68,5 @@ images, labels = dataiter.next()
 #         6, 1, 1, 4, 0, 2, 7, 3, 6, 6, 2, 0, 2, 2, 2, 8])
 
 # 8x8の格子状に画像を表示
-#imshow(images[0])
+# imshow(images[0])
 imshow(torchvision.utils.make_grid(images, nrow=4))
